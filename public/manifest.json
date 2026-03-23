@@ -1,11 +1,11 @@
 {
-  "name": "NoteFlow - 智能笔记应用",
-  "short_name": "NoteFlow",
-  "description": "一款美观、强大且易用的智能笔记应用",
+  "name": "TRAINFLOW",
+  "short_name": "TRAINFLOW",
+  "description": "你的健身与规划助手",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "background_color": "#0d0d0d",
+  "theme_color": "#dc2626",
   "orientation": "portrait-primary",
   "icons": [
     {

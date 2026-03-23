@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NoteFlow - 智能笔记应用",
-  description: "一款美观、强大且易用的智能笔记应用",
+  title: "TRAINFLOW",
+  description: "你的健身与规划助手",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "NoteFlow",
+    statusBarStyle: "black-translucent",
+    title: "TRAINFLOW",
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#dc2626" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

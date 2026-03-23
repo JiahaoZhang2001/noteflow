@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#0d0d0d"/>
+
+  <!-- Dumbbell bar -->
+  <rect x="156" y="240" width="200" height="32" rx="16" fill="#dc2626"/>
+
+  <!-- Left weight outer -->
+  <rect x="100" y="200" width="68" height="112" rx="18" fill="#b91c1c"/>
+  <!-- Left weight inner -->
+  <rect x="118" y="218" width="32" height="76" rx="10" fill="#dc2626"/>
+
+  <!-- Right weight outer -->
+  <rect x="344" y="200" width="68" height="112" rx="18" fill="#b91c1c"/>
+  <!-- Right weight inner -->
+  <rect x="362" y="218" width="32" height="76" rx="10" fill="#dc2626"/>
+
+  <!-- Flame -->
+  <path d="M256 80 C256 80 228 120 228 148 C228 162 238 172 248 168 C240 180 232 196 232 212 C232 238 244 252 256 252 C268 252 280 238 280 212 C280 196 272 180 264 168 C274 172 284 162 284 148 C284 120 256 80 256 80Z" fill="#ef4444"/>
+  <path d="M256 108 C256 108 244 130 244 148 C244 158 250 164 256 162 C262 164 268 158 268 148 C268 130 256 108 256 108Z" fill="#fca5a5"/>
+</svg>
