@@ -8,7 +8,11 @@
       "Bash(git remote:*)",
       "Bash(git push:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(gh run:*)",
+      "Bash(magick public/icons/icon.svg -resize 192x192 public/icons/icon-192.png)",
+      "Bash(magick public/icons/icon.svg -resize 512x512 public/icons/icon-512.png)"
     ]
   }
 }

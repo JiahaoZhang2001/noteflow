@@ -9,7 +9,7 @@ interface AppState {
   // Auth
   user: User | null;
   authLoading: boolean;
-  signIn: (email: string) => Promise<string | null>;
+  signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   initAuth: () => void;
   loadData: (userId: string) => Promise<void>;
@@ -82,12 +82,12 @@ export const useStore = create<AppState>()(
       user: null,
       authLoading: true,
 
-      signIn: async (email) => {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        return error ? error.message : null;
+      signIn: async (email, password) => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (!error) return null;
+        // If login fails, try sign up
+        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        return signUpError ? signUpError.message : null;
       },
 
       signOut: async () => {
