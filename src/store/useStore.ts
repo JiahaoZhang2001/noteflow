@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import type { Note, Folder, Tag, EditorMode, Theme, NoteVersion } from '@/types';
+import type { Note, Folder, Tag, EditorMode, Theme, NoteVersion, AppView, FitnessRecord, TodoItem, DayPlan } from '@/types';
 
 interface AppState {
   // Notes
@@ -43,6 +43,24 @@ interface AppState {
   addTagToNote: (noteId: string, tagId: string) => void;
   removeTagFromNote: (noteId: string, tagId: string) => void;
 
+  // Fitness
+  fitnessRecords: FitnessRecord[];
+  addFitnessRecord: (record: Omit<FitnessRecord, 'id'>) => void;
+  updateFitnessRecord: (id: string, updates: Partial<Omit<FitnessRecord, 'id'>>) => void;
+  deleteFitnessRecord: (id: string) => void;
+
+  // Planning
+  dayPlans: DayPlan[];
+  addDayPlan: (date: string) => void;
+  deleteDayPlan: (id: string) => void;
+  addTodo: (dayPlanId: string, text: string) => void;
+  toggleTodo: (dayPlanId: string, todoId: string) => void;
+  deleteTodo: (dayPlanId: string, todoId: string) => void;
+
+  // App View
+  appView: AppView;
+  setAppView: (view: AppView) => void;
+
   // UI Actions
   setEditorMode: (mode: EditorMode) => void;
   setTheme: (theme: Theme) => void;
@@ -72,9 +90,12 @@ export const useStore = create<AppState>()(
       activeFolderId: null,
       tags: [],
       editorMode: 'richtext',
-      theme: 'system',
+      theme: 'dark',
       sidebarOpen: true,
       searchQuery: '',
+      fitnessRecords: [],
+      dayPlans: [],
+      appView: 'fitness',
 
       // Note Actions
       createNote: (folderId = null) => {
@@ -277,6 +298,71 @@ export const useStore = create<AppState>()(
         }));
       },
 
+      // Fitness Actions
+      addFitnessRecord: (record) => {
+        const newRecord: FitnessRecord = { id: uuidv4(), ...record };
+        set((state) => ({
+          fitnessRecords: [...state.fitnessRecords, newRecord].sort((a, b) => a.date.localeCompare(b.date)),
+        }));
+      },
+
+      updateFitnessRecord: (id, updates) => {
+        set((state) => ({
+          fitnessRecords: state.fitnessRecords
+            .map((r) => (r.id === id ? { ...r, ...updates } : r))
+            .sort((a, b) => a.date.localeCompare(b.date)),
+        }));
+      },
+
+      deleteFitnessRecord: (id) => {
+        set((state) => ({
+          fitnessRecords: state.fitnessRecords.filter((r) => r.id !== id),
+        }));
+      },
+
+      // Planning Actions
+      addDayPlan: (date) => {
+        const exists = get().dayPlans.some((p) => p.date === date);
+        if (exists) return;
+        const newPlan: DayPlan = { id: uuidv4(), date, todos: [] };
+        set((state) => ({
+          dayPlans: [...state.dayPlans, newPlan].sort((a, b) => a.date.localeCompare(b.date)),
+        }));
+      },
+
+      deleteDayPlan: (id) => {
+        set((state) => ({ dayPlans: state.dayPlans.filter((p) => p.id !== id) }));
+      },
+
+      addTodo: (dayPlanId, text) => {
+        const todo: TodoItem = { id: uuidv4(), text, completed: false };
+        set((state) => ({
+          dayPlans: state.dayPlans.map((p) =>
+            p.id === dayPlanId ? { ...p, todos: [...p.todos, todo] } : p
+          ),
+        }));
+      },
+
+      toggleTodo: (dayPlanId, todoId) => {
+        set((state) => ({
+          dayPlans: state.dayPlans.map((p) =>
+            p.id === dayPlanId
+              ? { ...p, todos: p.todos.map((t) => (t.id === todoId ? { ...t, completed: !t.completed } : t)) }
+              : p
+          ),
+        }));
+      },
+
+      deleteTodo: (dayPlanId, todoId) => {
+        set((state) => ({
+          dayPlans: state.dayPlans.map((p) =>
+            p.id === dayPlanId ? { ...p, todos: p.todos.filter((t) => t.id !== todoId) } : p
+          ),
+        }));
+      },
+
+      setAppView: (view) => set({ appView: view }),
+
       // UI Actions
       setEditorMode: (mode) => {
         set({ editorMode: mode });
@@ -326,6 +412,8 @@ export const useStore = create<AppState>()(
         tags: state.tags,
         theme: state.theme,
         editorMode: state.editorMode,
+        fitnessRecords: state.fitnessRecords,
+        dayPlans: state.dayPlans,
       }),
     }
   )

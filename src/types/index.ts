@@ -33,3 +33,24 @@ export interface Tag {
 export type EditorMode = 'richtext' | 'markdown';
 
 export type Theme = 'light' | 'dark' | 'system';
+
+export type AppView = 'fitness' | 'planning';
+
+export interface FitnessRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  weight?: number;
+  workout: string;
+}
+
+export interface TodoItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface DayPlan {
+  id: string;
+  date: string; // YYYY-MM-DD
+  todos: TodoItem[];
+}

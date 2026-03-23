@@ -1,52 +1,51 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
-import { Sidebar } from './sidebar/Sidebar';
-import { Editor } from './editor/Editor';
-import { Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { FitnessTracker } from './fitness/FitnessTracker';
+import { PlanningBoard } from './planning/PlanningBoard';
+import { Dumbbell, Target } from 'lucide-react';
 
 export function Layout() {
-  const { sidebarOpen, toggleSidebar } = useStore();
+  const { appView, setAppView } = useStore();
 
   return (
-    <div className="flex h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-
-      {/* Sidebar: overlay on mobile, inline on desktop */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 transition-transform duration-300
-        md:relative md:translate-x-0 md:z-auto
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:hidden'}
-      `}>
-        <Sidebar />
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Top Bar */}
-        <div className="h-12 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+    <div className="flex flex-col h-screen bg-[#0d0d0d] text-white">
+      {/* Top Header */}
+      <header className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f]">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🔥</span>
+          <span className="font-bold text-white tracking-wide">TRAINFLOW</span>
+        </div>
+        <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-xl p-1">
           <button
-            onClick={toggleSidebar}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            title={sidebarOpen ? '收起侧边栏' : '展开侧边栏'}
+            onClick={() => setAppView('fitness')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              appView === 'fitness'
+                ? 'bg-red-600 text-white'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
           >
-            {sidebarOpen ? (
-              <PanelLeftClose className="w-5 h-5 text-gray-500" />
-            ) : (
-              <PanelLeft className="w-5 h-5 text-gray-500" />
-            )}
+            <Dumbbell className="w-3.5 h-3.5" />
+            健身
+          </button>
+          <button
+            onClick={() => setAppView('planning')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              appView === 'planning'
+                ? 'bg-red-600 text-white'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            <Target className="w-3.5 h-3.5" />
+            规划
           </button>
         </div>
+      </header>
 
-        {/* Editor */}
-        <Editor />
-      </main>
+      {/* Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {appView === 'fitness' ? <FitnessTracker /> : <PlanningBoard />}
+      </div>
     </div>
   );
 }
