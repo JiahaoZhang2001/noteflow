@@ -2,12 +2,10 @@
 
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
-import { Plus, Trash2, Dumbbell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Dumbbell, Pencil, Check, X } from 'lucide-react';
 
 function getNextDate(records: { date: string }[]): string {
-  if (records.length === 0) {
-    return new Date().toISOString().split('T')[0];
-  }
+  if (records.length === 0) return new Date().toISOString().split('T')[0];
   const last = records[records.length - 1].date;
   const next = new Date(last);
   next.setDate(next.getDate() + 1);
@@ -16,49 +14,60 @@ function getNextDate(records: { date: string }[]): string {
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' });
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 }
+
+type EditState = {
+  weight: string;
+  bodyPart: string;
+  exercises: string;
+};
 
 export function FitnessTracker() {
   const { fitnessRecords, addFitnessRecord, updateFitnessRecord, deleteFitnessRecord } = useStore();
 
   const [showForm, setShowForm] = useState(false);
-  const [date, setDate] = useState('');
-  const [weight, setWeight] = useState('');
-  const [workout, setWorkout] = useState('');
+  const [form, setForm] = useState({ date: '', weight: '', bodyPart: '', exercises: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editWeight, setEditWeight] = useState('');
-  const [editWorkout, setEditWorkout] = useState('');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editState, setEditState] = useState<EditState>({ weight: '', bodyPart: '', exercises: '' });
 
   const handleOpenForm = () => {
-    setDate(getNextDate(fitnessRecords));
-    setWeight('');
-    setWorkout('');
+    setForm({ date: getNextDate(fitnessRecords), weight: '', bodyPart: '', exercises: '' });
     setShowForm(true);
   };
 
   const handleSubmit = () => {
-    if (!date) return;
-    addFitnessRecord({ date, weight: weight ? parseFloat(weight) : undefined, workout });
+    if (!form.date) return;
+    addFitnessRecord({
+      date: form.date,
+      weight: form.weight ? parseFloat(form.weight) : undefined,
+      bodyPart: form.bodyPart,
+      exercises: form.exercises,
+    });
     setShowForm(false);
   };
 
-  const handleEdit = (id: string) => {
+  const startEdit = (id: string) => {
     const r = fitnessRecords.find((r) => r.id === id);
     if (!r) return;
     setEditingId(id);
-    setEditWeight(r.weight != null ? String(r.weight) : '');
-    setEditWorkout(r.workout);
+    setEditState({
+      weight: r.weight != null ? String(r.weight) : '',
+      bodyPart: r.bodyPart,
+      exercises: r.exercises,
+    });
   };
 
-  const handleSaveEdit = (id: string) => {
+  const saveEdit = (id: string) => {
     updateFitnessRecord(id, {
-      weight: editWeight ? parseFloat(editWeight) : undefined,
-      workout: editWorkout,
+      weight: editState.weight ? parseFloat(editState.weight) : undefined,
+      bodyPart: editState.bodyPart,
+      exercises: editState.exercises,
     });
     setEditingId(null);
   };
+
+  const reversed = [...fitnessRecords].reverse();
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 max-w-2xl mx-auto w-full">
@@ -85,40 +94,53 @@ export function FitnessTracker() {
       {/* Add Form */}
       {showForm && (
         <div className="mb-4 p-4 bg-[#1a1a1a] border border-red-900/50 rounded-2xl space-y-3">
-          <div className="text-sm font-medium text-red-400 mb-1">新增训练日</div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">日期</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">体重 (kg)</label>
-              <input
-                type="number"
-                step="0.1"
-                placeholder="例：70.5"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
-              />
-            </div>
-          </div>
+          <div className="text-sm font-medium text-red-400">新增训练日</div>
+
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">训练内容</label>
+            <label className="text-xs text-gray-500 mb-1 block">日期</label>
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">体重 (kg)</label>
+            <input
+              type="number"
+              step="0.1"
+              placeholder="例：70.5"
+              value={form.weight}
+              onChange={(e) => setForm({ ...form, weight: e.target.value })}
+              className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">训练部位</label>
+            <input
+              type="text"
+              placeholder="例：胸肌 / 腿部 / 背部"
+              value={form.bodyPart}
+              onChange={(e) => setForm({ ...form, bodyPart: e.target.value })}
+              className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">训练动作与重量</label>
             <textarea
-              placeholder="例：胸肌 3组×12 / 深蹲 4组×10 / 篮球 1小时"
-              value={workout}
-              onChange={(e) => setWorkout(e.target.value)}
-              rows={2}
+              placeholder="例：卧推 60kg×10×3&#10;深蹲 80kg×8×4"
+              value={form.exercises}
+              onChange={(e) => setForm({ ...form, exercises: e.target.value })}
+              rows={3}
               className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500 resize-none"
             />
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex gap-2 pt-1">
             <button
               onClick={handleSubmit}
               className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
@@ -135,110 +157,112 @@ export function FitnessTracker() {
         </div>
       )}
 
-      {/* Records List */}
-      {fitnessRecords.length === 0 && !showForm ? (
+      {/* Records */}
+      {reversed.length === 0 && !showForm ? (
         <div className="text-center py-20 text-gray-600">
           <div className="text-5xl mb-4">🏋️</div>
           <p className="text-sm">还没有记录，开始第一次训练吧</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {[...fitnessRecords].reverse().map((record, index) => (
-            <div
-              key={record.id}
-              className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl overflow-hidden"
-            >
-              {/* Record Header */}
-              <div
-                className="flex items-center justify-between px-4 py-3 cursor-pointer"
-                onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#111] border border-[#333] flex items-center justify-center">
-                    <span className="text-xs font-bold text-red-500">
-                      {fitnessRecords.length - index}
-                    </span>
+          {reversed.map((record, index) => (
+            <div key={record.id} className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl overflow-hidden">
+              {editingId === record.id ? (
+                /* Edit Mode */
+                <div className="p-4 space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">体重 (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={editState.weight}
+                      onChange={(e) => setEditState({ ...editState, weight: e.target.value })}
+                      className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
+                    />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">{formatDate(record.date)}</div>
-                    {record.weight != null && (
-                      <div className="text-xs text-gray-500">{record.weight} kg</div>
-                    )}
+                    <label className="text-xs text-gray-500 mb-1 block">训练部位</label>
+                    <input
+                      type="text"
+                      value={editState.bodyPart}
+                      onChange={(e) => setEditState({ ...editState, bodyPart: e.target.value })}
+                      className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">训练动作与重量</label>
+                    <textarea
+                      value={editState.exercises}
+                      onChange={(e) => setEditState({ ...editState, exercises: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500 resize-none"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => saveEdit(record.id)}
+                      className="flex-1 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Check className="w-3.5 h-3.5" /> 保存
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="px-3 py-1.5 bg-[#222] text-gray-400 rounded-lg text-sm transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {expandedId === record.id ? (
-                    <ChevronUp className="w-4 h-4 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  )}
-                </div>
-              </div>
+              ) : (
+                /* Display Mode */
+                <div>
+                  {/* Row: 日期 */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#222]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-md bg-[#111] border border-[#333] flex items-center justify-center text-xs font-bold text-red-500">
+                        {fitnessRecords.length - index}
+                      </span>
+                      <span className="text-sm font-semibold text-white">{formatDate(record.date)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => startEdit(record.id)}
+                        className="p-1.5 text-gray-600 hover:text-gray-300 rounded-lg transition-colors"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => deleteFitnessRecord(record.id)}
+                        className="p-1.5 text-gray-600 hover:text-red-500 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Expanded Content */}
-              {expandedId === record.id && (
-                <div className="px-4 pb-4 border-t border-[#2a2a2a] pt-3 space-y-3">
-                  {editingId === record.id ? (
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs text-gray-500 mb-1 block">体重 (kg)</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            value={editWeight}
-                            onChange={(e) => setEditWeight(e.target.value)}
-                            className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">训练内容</label>
-                        <textarea
-                          value={editWorkout}
-                          onChange={(e) => setEditWorkout(e.target.value)}
-                          rows={3}
-                          className="w-full px-3 py-2 bg-[#111] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-red-500 resize-none"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleSaveEdit(record.id)}
-                          className="flex-1 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
-                        >
-                          保存
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="px-3 py-1.5 bg-[#222] text-gray-400 rounded-lg text-sm transition-colors"
-                        >
-                          取消
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {record.workout ? (
-                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{record.workout}</p>
-                      ) : (
-                        <p className="text-sm text-gray-600 italic">未填写训练内容</p>
-                      )}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(record.id)}
-                          className="flex-1 py-1.5 bg-[#222] hover:bg-[#2a2a2a] text-gray-400 rounded-lg text-sm transition-colors"
-                        >
-                          编辑
-                        </button>
-                        <button
-                          onClick={() => deleteFitnessRecord(record.id)}
-                          className="px-3 py-1.5 bg-[#222] hover:bg-red-900/40 text-gray-500 hover:text-red-400 rounded-lg text-sm transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </>
-                  )}
+                  {/* Row: 体重 */}
+                  <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#222]">
+                    <span className="text-xs text-gray-500 w-20 flex-shrink-0">体重</span>
+                    <span className="text-sm text-white">
+                      {record.weight != null ? `${record.weight} kg` : <span className="text-gray-600">—</span>}
+                    </span>
+                  </div>
+
+                  {/* Row: 训练部位 */}
+                  <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#222]">
+                    <span className="text-xs text-gray-500 w-20 flex-shrink-0">训练部位</span>
+                    <span className="text-sm text-white">
+                      {record.bodyPart || <span className="text-gray-600">—</span>}
+                    </span>
+                  </div>
+
+                  {/* Row: 训练动作与重量 */}
+                  <div className="flex gap-3 px-4 py-2.5">
+                    <span className="text-xs text-gray-500 w-20 flex-shrink-0 pt-0.5">动作与重量</span>
+                    <span className="text-sm text-white whitespace-pre-wrap flex-1">
+                      {record.exercises || <span className="text-gray-600">—</span>}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>

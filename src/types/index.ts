@@ -40,7 +40,8 @@ export interface FitnessRecord {
   id: string;
   date: string; // YYYY-MM-DD
   weight?: number;
-  workout: string;
+  bodyPart: string;
+  exercises: string;
 }
 
 export interface TodoItem {
